@@ -1,0 +1,854 @@
+# Flutter Live Streaming with Video SDK
+## 5 Steps to Build an Interactive Live Streaming app in Flutter
+
+![Video SDK](https://www.videosdk.live/_next/image?url=https%3A%2F%2Fassets.videosdk.live%2Fstatic-assets%2Fghost%2F2023%2F04%2Fimage-5.png&w=2048&q=75)
+
+Before preceding, Consider the prerequisites mentioned below:
+- Basic understanding of Flutter framework.
+- Video SDK Developer Account (Not having one? Go to the Video SDK [Dashboard](https://app.videosdk.live/)).
+- Video SDK [Flutter Package](https://pub.dev/packages/videosdk).
+
+So, Now you are ready to create a fresh flutter project.
+
+#### Create a new Flutter Project
+To create a new Flutter project, run the following command at your chosen location:
+
+```js
+flutter create videosdk_flutter_ils_app
+```
+
+After navigating to the project directory, run the following command in terminal:
+
+```js
+flutter pub add videosdk
+```
+
+`videosdk` package will now be added to the pubspec.yaml.
+
+You'll need to add a few other packages
+
+- http - `http: ^0.13.5`
+- flutter_vlc_player - `flutter_vlc_player: ^7.2.0`
+
+
+### Configure flutter project
+
+#### For Android
+
+- You will need to update the `/android/app/src/main/AndroidManifest.xml` for the permissions you will be using to implement the audio and video features.
+
+```js
+<uses-feature android:name="android.hardware.camera" />
+<uses-feature android:name="android.hardware.camera.autofocus" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<uses-permission android:name="android.permission.INTERNET"/>
+```
+
+- App level `build.gradle` file at `/android/app/build.gradle` needs to be updated. You will need to increase `minSdkVersion` of `defaultConfig` up to `23`
+
+#### For iOS
+
+- `Info.plist` file at `/ios/Runner/Info.plist` needs to be updated to add permissions for iOS.
+
+```js
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) Camera Usage!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) Microphone Usage!</string>
+```
+
+- You will need to uncomment the following line to define a global platform for your project in `/ios/Podfile`
+
+```js
+# platform :ios, '11.0'
+```
+
+### Project Structure
+
+```js
+root
+├── android
+├── ios
+├── lib
+     ├── api_call.dart
+     ├── ils_screen.dart
+     ├── ils_speaker_view.dart
+     ├── ils_viewer_view.dart
+     ├── join_screen.dart
+     ├── livestream_player.dart
+     ├── main.dart
+     ├── meeting_controls.dart
+     ├── participant_tile.dart
+```
+Project Structure
+
+
+### Step 1: Get Started in Flutter Live Streaming with api_call.dart
+Before jumping to anything else, you will have to write a function to generate a unique meeting id. In order to generate a meeting id, you will need an Authentication Token. You can get Authentication Token from [Video SDK Dashboard](https://app.videosdk.live/) (For Development) or [Video SDK Authentication Server](https://github.com/videosdk-live/videosdk-rtc-api-server-examples) (For Production).
+
+```js
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+//Auth token we will use to generate a meeting and connect to it
+String token = "<< Authentication Token >>";
+
+// API call to create meeting
+Future<String> createMeeting() async {
+  final http.Response httpResponse = await http.post(
+    Uri.parse("https://api.videosdk.live/v2/rooms"),
+    headers: {'Authorization': token},
+  );
+
+//Destructuring the roomId from the response
+  return json.decode(httpResponse.body)['roomId'];
+}
+```
+
+### Step 2: JoinScreen Widget for Flutter Live Streaming App
+Let's create `join_screen.dart` file in `lib` directory and create a JoinScreen StatelessWidget.
+
+The JoinScreen will consist of:
+
+- **Create Meeting Button -** This button will create a new meeting for speaker and make him join with CONFERENCE mode.
+- **Meeting ID TextField -** This text field will contain the meeting ID of meeting you want to join.
+- **Join Meeting as Host Button -** This button will join the meeting in CONFERENCE mode for the speakers, which you have provided.
+- **Join Meeting as Viewer Button -** This button will join the meeting in VIEWER mode for the viewers, which you have provided.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:videosdk/videosdk.dart';
+import 'package:http/http.dart' as http;
+
+import 'api_call.dart';
+import 'ils_screen.dart';
+
+class JoinScreen extends StatelessWidget {
+  
+  final _meetingIdController = TextEditingController();
+
+  JoinScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('VideoSDK ILS QuickStart'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Creating a new meeting
+            ElevatedButton(
+              onPressed: () => onCreateButtonPressed(context),
+              child: const Text('Create Meeting'),
+            ),
+            const SizedBox(height: 40),
+            TextField(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Enter Meeting Id',
+                border: OutlineInputBorder(),
+                hintStyle: TextStyle(color: Colors.white),
+              ),
+              controller: _meetingIdController,
+            ),
+            // Joining the meeting as host
+            ElevatedButton(
+              onPressed: () => onJoinButtonPressed(context, Mode.CONFERENCE),
+              child: const Text('Join Meeting as Host'),
+            ),
+            // Joining the meeting as viewer
+            ElevatedButton(
+              onPressed: () => onJoinButtonPressed(context, Mode.VIEWER),
+              child: const Text('Join Meeting as Viewer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  // Creates new Meeting Id and joins it in CONFERNCE mode.
+  void onCreateButtonPressed(BuildContext context) async {
+    // TODO: Implement 
+  }
+
+  // Join the provided meeting with given Mode and meetingId
+  void onJoinButtonPressed(BuildContext context, Mode mode) {
+	// TODO: Implement
+  }
+}
+```
+join_screen.dart
+
+  
+
+```js
+// Creates new Meeting Id and joins it in CONFERNCE mode.
+  void onCreateButtonPressed(BuildContext context) async {
+    // Call createMeeting method
+    final meetingId = await createMeeting();
+   
+    if (!context.mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ILSScreen(
+          meetingId: meetingId,
+          token: token,
+          mode: Mode.CONFERENCE,
+        ),
+      ),
+    );
+   });
+  }
+```
+
+onCreateButtonPressed() implementation
+
+```js
+  // Join the provided meeting with given Mode and meetingId
+  void onJoinButtonPressed(BuildContext context, Mode mode) {
+    String meetingId = _meetingIdController.text;
+    var re = RegExp("\\w{4}\\-\\w{4}\\-\\w{4}");
+    
+    // Check meeting ID is not null or invaild
+    if (meetingId.isNotEmpty && re.hasMatch(meetingId)) {
+      _meetingIdController.clear();
+      // Navigate to ILSScreen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ILSScreen(
+            meetingId: meetingId,
+            token: token,
+            mode: mode,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please enter valid meeting id"),
+      ));
+    }
+  }
+```
+
+onJoinButtonPressed() implementation
+
+- Update the app's home to JoinScreen in the `main.dart` file.
+
+```js
+import 'package:flutter/material.dart';
+import 'join_screen.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'VideoSDK QuickStart',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: JoinScreen(),
+    );
+  }
+}
+```
+
+main.dart
+
+**Output**
+
+![JoinScreen](https://www.videosdk.live/_next/image?url=https%3A%2F%2Fassets.videosdk.live%2Fstatic-assets%2Fghost%2F2023%2F04%2Fflutter_ils_joining--3-.png&w=256&q=75)
+
+
+### Step 3: Flutter Live Streaming Screen Widget
+Let's create `ils_screen.dart` file and create ILSScreen `StatefulWidget` that will take the `meetingId`, `token` and `mode` of the participant in the constructor.
+
+We will create a new room using the `createRoom` method and render the `ILSSpeakerView` or `ILSViewerView` based on the passed participant `mode`.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:videosdk/videosdk.dart';
+import './ils_speaker_view.dart';
+import './ils_viewer_view.dart';
+
+class ILSScreen extends StatefulWidget {
+  final String meetingId;
+  final String token;
+  final Mode mode;
+
+  const ILSScreen(
+      {super.key,
+      required this.meetingId,
+      required this.token,
+      required this.mode});
+
+  @override
+  State<ILSScreen> createState() => _ILSScreenState();
+}
+
+class _ILSScreenState extends State<ILSScreen> {
+  late Room _room;
+  bool isJoined = false;
+
+  @override
+  void initState() {
+    // TODO: Implement
+    super.initState();
+  }
+
+  // listening to room events
+  void setMeetingEventListener() {
+    // TODO: Implement
+  }
+
+  // onbackButton pressed leave the room
+  Future<bool> _onWillPop() async {
+    _room.leave();
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () => _onWillPop(),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: const Text('VideoSDK ILS QuickStart'),
+        ),
+        //Showing the Speaker or Viewer View based on the mode
+        body: isJoined
+            ? widget.mode == Mode.CONFERENCE
+                ? ILSSpeakerView(room: _room)
+                : widget.mode == Mode.VIEWER
+                    ? ILSViewerView(room: _room)
+                    : null
+            : const Center(
+                  child: Text("Joining...",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+      ),
+    );
+  }
+}
+```
+ils_screen.dart
+
+```js
+@override
+void initState() {
+  // create room when widget loads
+  _room = VideoSDK.createRoom(
+    roomId: widget.meetingId,
+    token: widget.token,
+    displayName: "John Doe",
+    micEnabled: true,
+    camEnabled: true,
+    defaultCameraIndex: 1, // Index of MediaDevices will be used to set default camera
+    mode: widget.mode,
+  );
+
+  // setting the event listener for join and leave events
+  setMeetingEventListener();
+  
+  // Joining room
+  _room.join();
+  
+   super.initState();
+}
+```
+initState() implementation
+
+```js
+// listening to room events
+void setMeetingEventListener() {
+
+  // Setting the joining flag to true when meeting is joined
+  _room.on(Events.roomJoined, () {
+    if (widget.mode == Mode.CONFERENCE) {
+      _room.localParticipant.pin();
+    }
+    setState(() {
+      isJoined = true;
+    });
+  });
+
+  //Handling navigation when meeting is left
+  _room.on(Events.roomLeft, () {
+    Navigator.popUntil(context, ModalRoute.withName('/'));
+  });
+}
+```
+setMeetingEventListener() implementation
+
+### Step 4: SpeakerView Widget for Flutter Live Streaming App
+Let's create the `ILSSpeakerView` which will show the `MeetingControls` and the `ParticipantTile` in grid.
+
+- Let us start off by creating the `StatefulWidget` named `ParticipantTile` in `participant_tile.dart` file. It will consist of `RTCVideoView` that will show participant's video stream.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:videosdk/videosdk.dart';
+class ParticipantTile extends StatefulWidget {
+  final Participant participant;
+  const ParticipantTile({super.key, required this.participant});
+
+  @override
+  State<ParticipantTile> createState() => _ParticipantTileState();
+}
+
+class _ParticipantTileState extends State<ParticipantTile> {
+  Stream? videoStream;
+
+  @override
+  void initState() {
+    // initialze video stream for the participant if they are present
+    widget.participant.streams.forEach((key, Stream stream) {
+      setState(() {
+        if (stream.kind == 'video') {
+          videoStream = stream;
+        }
+      });
+    });
+    _initStreamListeners();
+    super.initState();
+  }
+
+  //Event listener for the video stream of the participant
+  _initStreamListeners() {
+    widget.participant.on(Events.streamEnabled, (Stream stream) {
+      if (stream.kind == 'video') {
+        setState(() => videoStream = stream);
+      }
+    });
+
+    widget.participant.on(Events.streamDisabled, (Stream stream) {
+      if (stream.kind == 'video') {
+        setState(() => videoStream = null);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      //Rending the Video Stream of the participant
+      child: videoStream != null
+          ? RTCVideoView(
+              videoStream?.renderer as RTCVideoRenderer,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            )
+          : Container(
+              color: Colors.grey.shade800,
+              child: const Center(
+                child: Icon(
+                  Icons.person,
+                  size: 100,
+                ),
+              ),
+            ),
+    );
+  }
+}
+```
+
+- Next let us add the `StatelessWidget` named `MeetingControls` in the `meeting_controls.dart` file. This widget will accept the callback handlers for all the meeting control buttons and the current HLS state of the meeting.
+
+```js
+import 'package:flutter/material.dart';
+
+class MeetingControls extends StatelessWidget {
+  final String hlsState;
+  final void Function() onToggleMicButtonPressed;
+  final void Function() onToggleCameraButtonPressed;
+  final void Function() onHLSButtonPressed;
+
+  const MeetingControls(
+      {super.key,
+      required this.hlsState,
+      required this.onToggleMicButtonPressed,
+      required this.onToggleCameraButtonPressed,
+      required this.onHLSButtonPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      children: [
+        ElevatedButton(
+          onPressed: onToggleMicButtonPressed,
+            child: const Text('Toggle Mic')),
+        const SizedBox(width: 10),
+        ElevatedButton(
+            onPressed: onToggleCameraButtonPressed,
+            child: const Text('Toggle WebCam')),
+        const SizedBox(width: 10),
+        ElevatedButton(
+            onPressed: onHLSButtonPressed,
+            child: Text(hlsState == "HLS_STOPPED"
+                ? 'Start HLS'
+                : hlsState == "HLS_STARTING"
+                    ? "Starting HLS"
+                    : hlsState == "HLS_STARTED" || hlsState == "HLS_PLAYABLE"
+                        ? "Stop HLS"
+                        : hlsState == "HLS_STOPPING"
+                            ? "Stopping HLS"
+                            : "Start HLS")),
+      ],
+    );
+  }
+}
+```
+
+- Lets finally put all these widget in the `StatefulWidget` named `ILSSpeakerView` in `ils_speaker_view.dart` file. This widget will listen to the `hlsStateChanged`, `participantJoined` and `participantLeft` events. It will render the participants and the meeting controls like leave, toggle mic and webcam as well as start and stop HLS.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:videosdk/videosdk.dart';
+import 'package:videosdk_flutter_quickstart/meeting_controls.dart';
+import 'package:videosdk_flutter_quickstart/participant_tile.dart';
+
+class ILSSpeakerView extends StatefulWidget {
+  final Room room;
+  const ILSSpeakerView({super.key, required this.room});
+
+  @override
+  State<ILSSpeakerView> createState() => _ILSSpeakerViewState();
+}
+
+class _ILSSpeakerViewState extends State<ILSSpeakerView> {
+  var micEnabled = true;
+  var camEnabled = true;
+  String hlsState = "HLS_STOPPED";
+
+  Map<String, Participant> participants = {};
+
+  @override
+  void initState() {
+    super.initState();
+    //Setting up the event listeners and initializing the participants and hls state
+    setMeetingEventListener();
+    participants.putIfAbsent(
+        widget.room.localParticipant.id, () => widget.room.localParticipant);
+    //filtering the CONFERENCE participants to be shown in the grid
+    widget.room.participants.values.forEach((participant) {
+      if (participant.mode == Mode.CONFERENCE) {
+        participants.putIfAbsent(participant.id, () => participant);
+      }
+    });
+    hlsState = widget.room.hlsState;
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  child: Text(
+                widget.room.id,
+                style: const TextStyle(color: Colors.white),
+              )),
+              ElevatedButton(
+                onPressed: () => {
+                  Clipboard.setData(ClipboardData(text: widget.room.id)),
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Meeting Id Coppied"),
+                  ))
+                },
+                child: const Text("Copy Meeting Id"),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () => {widget.room.leave()},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                child: const Text("Leave"),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          //Showing the current HLS state
+          Text(
+            "Current HLS State: ${hlsState == "HLS_STARTED" || hlsState == "HLS_PLAYABLE" ? "Livestream is Started" : hlsState == "HLS_STARTING" ? "Livestream is starting" : hlsState == "HLS_STOPPING" ? "Livestream is stopping" : "Livestream is stopped"}",
+            style: const TextStyle(color: Colors.white),
+          ),
+          //render all participants in the room
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+              ),
+              itemBuilder: (context, index) {
+                return ParticipantTile(
+                    participant: participants.values.elementAt(index));
+              },
+              itemCount: participants.length,
+            ),
+          ),
+          //Rending the meeting Controls
+          MeetingControls(
+            hlsState: hlsState,
+            onToggleMicButtonPressed: () {
+              micEnabled ? widget.room.muteMic() : widget.room.unmuteMic();
+              micEnabled = !micEnabled;
+            },
+            onToggleCameraButtonPressed: () {
+              camEnabled ? widget.room.disableCam() : widget.room.enableCam();
+              camEnabled = !camEnabled;
+            },
+            //HLS handler which will start and stop HLS
+            onHLSButtonPressed: () => {
+              if (hlsState == "HLS_STOPPED")
+                {
+                  widget.room.startHls(config: {
+                    "layout": {
+                      "type": "SPOTLIGHT",
+                      "priority": "PIN",
+                      "GRID": 20,
+                    },
+                    "mode": "video-and-audio",
+                    "theme": "DARK",
+                    "quality": "high",
+                    "orientation": "portrait",
+                  })
+                }
+              else if (hlsState == "HLS_STARTED" || hlsState == "HLS_PLAYABLE")
+                {widget.room.stopHls()}
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // listening to room events for participants join, left and hls state changes
+  void setMeetingEventListener() {
+    widget.room.on(
+      Events.participantJoined,
+      (Participant participant) {
+        //Adding only Conference participant to show in grid
+        if (participant.mode == Mode.CONFERENCE) {
+          setState(
+            () => participants.putIfAbsent(participant.id, () => participant),
+          );
+        }
+      },
+    );
+
+    widget.room.on(Events.participantLeft, (String participantId) {
+      if (participants.containsKey(participantId)) {
+        setState(
+          () => participants.remove(participantId),
+        );
+      }
+    });
+    widget.room.on(
+      Events.hlsStateChanged,
+      (Map<String, dynamic> data) {
+        setState(
+          () => hlsState = data['status'],
+        );
+      },
+    );
+  }
+}
+```
+
+**Output**
+![SpeakerView](https://www.videosdk.live/_next/image?url=https%3A%2F%2Fassets.videosdk.live%2Fstatic-assets%2Fghost%2F2023%2F04%2Fflutter_ils_speaker_view--1-.png&w=256&q=75)
+
+
+### Step 5: ViewerView Widget for Flutter Live Streaming app
+Let's create `StatefulWidget` named `ILSViewerView` in the `ils_viewer_view.dart` file.
+
+ILSViewerView will listen to the `hlsStateChanged` event and if the HLS is started, it will show the livestream using the `flutter_vlc_player` library.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:videosdk/videosdk.dart';
+import './livestream_player.dart';
+
+class ILSViewerView extends StatefulWidget {
+  final Room room;
+  const ILSViewerView({super.key, required this.room});
+
+  @override
+  State<ILSViewerView> createState() => _ILSViewerViewState();
+}
+
+class _ILSViewerViewState extends State<ILSViewerView> {
+  String hlsState = "HLS_STOPPED";
+  String? downstreamUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    //initialize the room's hls state and hls's downstreamUrl
+    hlsState = widget.room.hlsState;
+    downstreamUrl = widget.room.hlsDownstreamUrl;
+    //add the hlsStateChanged event listener
+    setMeetingEventListener();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                    child: Text(widget.room.id,
+                        style: const TextStyle(color: Colors.white))),
+                ElevatedButton(
+                  onPressed: () =>
+                      {Clipboard.setData(ClipboardData(text: widget.room.id))},
+                  child: const Text("Copy Meeting Id"),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () => {widget.room.leave()},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text("Leave"),
+                )
+              ],
+            ),
+          ),
+          //Show the livestream player if the downstreamUrl is present
+          downstreamUrl != null
+              ? LivestreamPlayer(downstreamUrl: downstreamUrl!)
+              : const Text("Host has not started the HLS",
+                  style: TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  void setMeetingEventListener() {
+    // listening to hlsStateChanged events and updating the hlsState and downstremUrl
+    widget.room.on(
+      Events.hlsStateChanged,
+      (Map<String, dynamic> data) {
+        String status = data['status'];
+        if (mounted) {
+          setState(() {
+            hlsState = status;
+            if (status == "HLS_PLAYABLE" || status == "HLS_STOPPED") {
+              downstreamUrl = data['downstreamUrl'];
+            }
+          });
+        }
+      },
+    );
+  }
+}
+```
+
+Let us use the `flutter_vlc_player` library to play the HLS stream on the Viewer side. For these you will create a `StatefulWidget` named `LivestreamPlayer` in the `livestream_player.dart` file.
+
+```js
+import 'package:flutter/material.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+
+class LivestreamPlayer extends StatefulWidget {
+  final String downstreamUrl;
+  const LivestreamPlayer({
+    Key? key,
+    required this.downstreamUrl,
+  }) : super(key: key);
+
+  @override
+  LivestreamPlayerState createState() => LivestreamPlayerState();
+}
+
+class LivestreamPlayerState extends State<LivestreamPlayer>
+    with AutomaticKeepAliveClientMixin {
+  late VlcPlayerController _controller;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    //initializing the player
+    _controller = VlcPlayerController.network(widget.downstreamUrl,
+        options: VlcPlayerOptions());
+  }
+
+  @override
+  void dispose() async {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    //rendering the VlcPlayer
+    return VlcPlayer(
+      controller: _controller,
+      aspectRatio: 9 / 16,
+      placeholder: const Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+```
+
+**Output**
+![ViewerView](https://www.videosdk.live/_next/image?url=https%3A%2F%2Fassets.videosdk.live%2Fstatic-assets%2Fghost%2F2023%2F04%2Fflutter_ils_viewer_view--1-.png&w=256&q=75)
+
+
+**Its' time to Run and Test App**
+The app is all set to test. Make sure to update the `token` in `api_call.dart`
+     
+You can checkout the [complete code](https://github.com/videosdk-live/quickstart/tree/main/flutter-hls) here.
+
+# Conclusion
+In this blog, We understood the process of creating an interactive live stream app in Flutter. We discussed the importance and scalability of Video SDK for real-time communication, and we outlined five steps to follow. By following these steps, developers can create a powerful Flutter app that allows users to host and join live streaming sessions, view video streams of participants, and engage in a seamless and interactive experience. If you wish to add some more functionalities like chat messaging and screen sharing, you can always check out our [documentation](https://docs.videosdk.live/). If you face any difficulty while implementing, you can connect with us on our [discord community](https://discord.gg/Gpmj6eCq5u).
+
+# More Flutter Resources
+
+- [Build a Flutter Video Calling App with Video SDK](https://www.videosdk.live/blog/video-calling-in-flutter)
+- [Video SDK Flutter SDK Integration Guide](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/getting-started)
+- [Flutter SDK QuickStart](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/quick-start)
+- [Flutter SDK Github Example](https://github.com/videosdk-live/videosdk-rtc-flutter-sdk-example)
+- [Build a Flutter Video Calling App with Video SDK](https://www.videosdk.live/blog/video-calling-in-flutter)
+- [Video Call Flutter app with Video SDK (Android & IOS)](https://youtu.be/4h57eVcaC34)
+- [Official Video SDK flutter plugin: (feel free to give it a star ⭐)](https://pub.dev/packages/videosdk)
